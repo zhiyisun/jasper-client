@@ -1,0 +1,10 @@
+[Plugin]
+Name = snowboy-stt
+Version = 1.0.0
+License = Apache
+URL = https://snowboy.kitt.ai
+Description = Speech-To-Text implementation which relies on the Snowboy hotword detection.
+
+[Author]
+Name = Zhiyi Sun
+URL = http://zhiyisun.github.io/
