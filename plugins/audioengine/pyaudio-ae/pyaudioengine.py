@@ -4,6 +4,7 @@ import contextlib
 import re
 import slugify
 import pyaudio
+import time
 from jasper import plugin
 
 PYAUDIO_BIT_MAPPING = {8:  pyaudio.paInt8,
@@ -166,6 +167,7 @@ class PyAudioDevice(plugin.audioengine.AudioDevice):
         try:
             yield stream
         finally:
+            time.sleep(0.2)
             stream.close()
             self._logger.debug("%s stream closed on device '%s'",
                                "output" if output else "input", self.slug)
