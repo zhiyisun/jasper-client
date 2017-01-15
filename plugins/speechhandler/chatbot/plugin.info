@@ -1,0 +1,10 @@
+[Plugin]
+Name = chatbot
+Version = 1.0.0
+License = MIT
+URL = http://www.cleverbot.com
+Description = Chat with cleverbot
+
+[Author]
+Name = Zhiyi Sun
+URL = http://zhiyisun.github.io/
