@@ -2,40 +2,30 @@
 import difflib
 import logging
 from jasper import plugin
-from . import mpdclient
+from . import client
 
 
-class MPDControlPlugin(plugin.SpeechHandlerPlugin):
+class NeteasePlugin(plugin.SpeechHandlerPlugin):
     def __init__(self, *args, **kwargs):
-        super(MPDControlPlugin, self).__init__(*args, **kwargs)
+        super(NeteasePlugin, self).__init__(*args, **kwargs)
 
         self._logger = logging.getLogger(__name__)
 
         try:
-            server = self.profile['mpdclient']['server']
+            username = self.profile['netease']['username']
         except KeyError:
-            server = 'localhost'
+            self._logger.warning("Failed to get Netease username")
+            raise KeyError
 
         try:
-            port = int(self.profile['mpdclient']['port'])
-        except (KeyError, ValueError) as e:
-            port = 6600
-            if isinstance(e, ValueError):
-                self._logger.warning(
-                    "Configured port is invalid, using %d instead",
-                    port)
-
-        try:
-            password = self.profile['mpdclient']['password']
+            password = self.profile['netease']['password']
         except KeyError:
             password = ''
 
-        self._music = mpdclient.MPDClient(server=server, port=port,
-                                          password=password)
+        self._music = client.Client(username=username, password=password)
 
     def get_phrases(self):
-        #return [self.gettext('MUSIC'), self.gettext('SPOTIFY')]
-        return [self.gettext('SPOTIFY')]
+        return [self.gettext('MUSIC'), self.gettext('MP3'), self.gettext('NETEASE')]
 
     def handle(self, text, mic):
         """
@@ -51,7 +41,7 @@ class MPDControlPlugin(plugin.SpeechHandlerPlugin):
         mic.say(_("Please give me a moment, I'm starting the music mode."))
 
         phrases = [
-            _('PLAY'), _('PAUSE'), _('STOP'),
+            _('PLAY'), _('PAUSE'), _('STOP'),  _('RESUME'),
             _('NEXT'), _('PREVIOUS'),
             _('LOUDER'), _('SOFTER'),
             _('PLAYLIST'),
@@ -71,7 +61,7 @@ class MPDControlPlugin(plugin.SpeechHandlerPlugin):
 
                 # Pause if necessary
                 playback_state = self._music.get_playback_state()
-                if playback_state == mpdclient.PLAYBACK_STATE_PLAYING:
+                if playback_state == client.PLAYBACK_STATE_PLAYING:
                     self._music.pause()
                     texts = mic.active_listen()
                     self._music.play()
@@ -114,7 +104,7 @@ class MPDControlPlugin(plugin.SpeechHandlerPlugin):
                 playback_state = self._music.get_playback_state()
                 self._music.load_playlist(playlist)
                 mic.say(_('Playlist %s loaded.') % playlist)
-                if playback_state == mpdclient.PLAYBACK_STATE_PLAYING:
+                if playback_state == client.PLAYBACK_STATE_PLAYING:
                     self._music.play()
             else:
                 mic.say(_("Sorry, I can't find a playlist with that name."))
@@ -129,11 +119,18 @@ class MPDControlPlugin(plugin.SpeechHandlerPlugin):
                     song=song))
         elif _('PAUSE').upper() in command:
             playback_state = self._music.get_playback_state()
-            if playback_state == mpdclient.PLAYBACK_STATE_PLAYING:
+            if playback_state == client.PLAYBACK_STATE_PLAYING:
                 self._music.pause()
                 mic.say(_('Music paused.'))
             else:
                 mic.say(_('Music is not playing.'))
+        elif _('RESUME').upper() in command:
+            playback_state = self._music.get_playback_state()
+            if playback_state == client.PLAYBACK_STATE_PAUSED:
+                self._music.resume()
+                mic.say(_('Music resumed.'))
+            else:
+                mic.say(_('Music is playing.'))
         elif _('LOUDER').upper() in command:
             mic.say(_('Increasing volume.'))
             self._music.volume(10, relative=True)
@@ -155,6 +152,9 @@ class MPDControlPlugin(plugin.SpeechHandlerPlugin):
                 mic.say(_('Playing {song.title} by {song.artist}...').format(
                     song=song))
         elif any(cmd.upper() in command for cmd in (_('CLOSE'), _('EXIT'))):
+            playback_state = self._music.get_playback_state()
+            if playback_state == client.PLAYBACK_STATE_PLAYING:
+                self._music.stop()
             return False
 
         return True

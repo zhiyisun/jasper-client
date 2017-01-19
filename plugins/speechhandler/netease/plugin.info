@@ -1,0 +1,10 @@
+[Plugin]
+Name = netease
+Version = 1.0.0
+License = MIT
+URL = http://jasperproject.github.io/
+Description = Listen music from Netease
+
+[Author]
+Name = Zhiyi Sun
+URL = http://zhiyisun.github.io/
