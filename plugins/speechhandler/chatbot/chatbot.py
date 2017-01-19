@@ -14,8 +14,6 @@ class ChatbotPlugin(plugin.SpeechHandlerPlugin):
         except KeyError:
             language = 'en-US'
 
-        self._cleverbot = Cleverbot()
-
     def get_phrases(self):
         #Set wit.ai to make "CLEVER BOT" as "CLEVERBOT"
         return [self.gettext("CLEVERBOT"), self.gettext("BOT"), self.gettext("CHAT")]
@@ -30,7 +28,8 @@ class ChatbotPlugin(plugin.SpeechHandlerPlugin):
         """
         questions = ['Hello!']
         question = ''.join(questions)
-        answer = self._cleverbot.ask(question);
+        cleverbot = Cleverbot()
+        answer = cleverbot.ask(question);
 
         while True:
             mic.say(answer)
@@ -41,7 +40,7 @@ class ChatbotPlugin(plugin.SpeechHandlerPlugin):
                 question = ''.join(questions)
                 if question:
                     break
-            answer = self._cleverbot.ask(question);
+            answer = cleverbot.ask(question);
 
     def is_valid(self, text):
         """
