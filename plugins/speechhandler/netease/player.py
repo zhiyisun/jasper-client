@@ -27,7 +27,7 @@ class Player(object):
         self._playing_flag = True
         self._song_list = []
         self._state = 'stop'
-        self._volume = 50
+        self._volume = 30
         self.popen_handler = None
 
     def connect(self, username, password):
@@ -196,6 +196,8 @@ class Player(object):
             return
         songs = self._api.playlist_detail(self._playlists[index]['playlist_id'])
         songs_info = self._api.dig_info(songs, 'songs')
+        if not songs_info:
+            return
         self._song_list = []
         for song in songs_info:
             self._song_list.append(str(song['song_id']))

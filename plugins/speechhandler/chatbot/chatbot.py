@@ -26,21 +26,23 @@ class ChatbotPlugin(plugin.SpeechHandlerPlugin):
         text -- user-input, typically transcribed speech
         mic -- used to interact with the user (for both input and output)
         """
+
+        mic.say('Yes, sir.')
         questions = ['Hello!']
         question = ''.join(questions)
-        cleverbot = Cleverbot()
+        cleverbot = Cleverbot('Jasper')
         answer = cleverbot.ask(question);
 
         while True:
             mic.say(answer)
-            if self.gettext('BYE').upper() in question.upper():
+            if any(self.gettext('BYE').upper() in question.upper() for question in questions):
                 break
             while True:
                 questions = mic.active_listen()
-                question = ''.join(questions)
-                if question:
+                #question = ''.join(questions)
+                if questions:
                     break
-            answer = cleverbot.ask(question);
+            answer = cleverbot.ask(questions[0]);
 
     def is_valid(self, text):
         """
